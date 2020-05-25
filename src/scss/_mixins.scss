@@ -1,0 +1,30 @@
+
+@mixin bezelify() {
+  box-shadow: 
+  0 1px 1px #ccc, /*bottom external highlight*/
+  // 0 -1px 1px #666, /*top external shadow*/ 
+  inset 0 -1px 1px rgba(0,0,0,0.25), /*bottom internal shadow*/ 
+  inset 0 1px 1px rgba(255,255,255,0.5); /*top internal highlight*/
+}
+
+@mixin gradientify($gradient:linear-gradient(0deg, rgba(232,241,247,1) 0%, rgba(172,206,255,1) 100%), $bg: rgb(232,241,247)) {
+  background: $bg;
+  background: $gradient;
+  @include bezelify();
+}
+
+@mixin buttonify($width) {
+  @include gradientify();
+  border-radius: 50%;
+  border: none;
+  color: rgb(103, 127, 204);
+  width: $width;
+  height: $width;
+  cursor: pointer;
+  transition: background 2s ease-in-out;
+
+  &:hover {
+    background: darken(rgb(232,241,247), 10);
+    background: linear-gradient(184deg, darken(rgba(232,241,247,1), 10) 0%, darken(rgba(172,206,255,1), 10) 100%);
+  }
+}

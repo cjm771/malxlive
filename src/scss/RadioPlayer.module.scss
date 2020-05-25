@@ -1,0 +1,49 @@
+@import './media-queries';
+@import './mixins';
+
+$slider-height: 5px;
+
+.Player {
+
+  .PlayerInner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @include desktop {
+      justify-content: flex-start;
+    }
+
+    :global {
+      .slider {
+        width: 60%;
+        height: 10px;
+        margin-left: 2%;
+      }
+    }
+  
+    button {
+      @include buttonify(35px);
+      margin-left: 2%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .Thumb {
+      @include buttonify(1rem);
+      top: -50%;
+    }
+  
+    .Track {
+      background: grey;
+      height: $slider-height;
+  
+      &:first-child {
+        background: rgb(0, 255, 0);
+        height: $slider-height;
+      }
+  
+    }
+  }
+}

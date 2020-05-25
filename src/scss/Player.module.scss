@@ -1,0 +1,207 @@
+@import './media-queries';
+@import './mixins';
+
+@mixin glossy-pane() {
+  @include gradientify($gradient:linear-gradient(0deg, rgba(154,175,213,1) 0%, rgba(190,215,240,1) 5%, rgba(154,175,213,1) 30%, rgba(232,241,247,1) 65%, rgba(232,241,247,1) 85%, rgb(206, 229, 245) 100%), $bg: rgb(154,175,213));
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.Container {
+  max-width: 750px;
+  margin: auto;
+  padding: 1rem;
+  height: calc(100vh - 14rem);
+  padding-top: 6rem;
+
+
+
+  @include desktop-md {
+    // max-height: calc(100vh - 100px);
+    // display: flex;
+    // justify-content: center;
+    // align-items: center;
+    
+  }
+
+
+  .Player {
+    width: 100%;
+    padding-bottom: 56.25%;
+    position: relative;
+    
+    .MLLogo {
+      position: absolute;
+      height: auto;
+      width: 3%;
+      bottom: 11%;
+      left: 7%;
+
+      @include desktop {
+        left: auto;
+        right: 5%;
+        bottom: 6%
+      }
+    }
+
+    .Mobile {
+      display: none;
+      @include mobile {
+        display: block;
+      }
+    }
+
+    .Desktop {
+      display: none;
+      @include desktop {
+        display: block;
+      }
+    }
+
+
+    .PlayerInner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      .BG {
+        width: 100%;
+        height: 100%;
+      }
+
+      .Twitch {
+        position: absolute;
+        top: 7.5%;
+        width: 92.5%;
+        height:70%;
+        left: 5.5%;
+
+        iframe {
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .Mode {
+        position: absolute;
+        font-size: .75rem;
+        bottom: 100%;
+        width: 100%;
+        margin-bottom: 1rem;
+        left: auto;
+        right: auto;
+        select {
+          // font-family: 'Courier New', Courier, monospace;
+          font-weight: 800;
+          font-size: 12px;
+          background: transparent;
+        }
+        @include mobile {
+          @include glossy-pane();
+          
+          select {
+            border: 0;
+          }
+        }
+
+        @include desktop {
+          width: auto;
+          top: 1.5%;
+          right: 14%;
+          bottom: auto;
+          margin: auto;
+
+          select {
+            padding: 0;
+            @include bezelify();
+            background: transparent;
+            font-weight: 800;
+            
+            height: auto;
+          }
+        }
+        
+      }
+
+      .TRControls {
+        position: absolute;
+        top: 1%;
+        right: 2%;
+        display: none;
+        @include desktop {
+          display: block;;
+        }
+
+        .Minimize,
+        .Close {
+          cursor: not-allowed;
+          font-weight: 800;
+          font-size: .75rem;
+          color: rgb(5, 32, 121);
+          padding-left: .5rem;
+          
+          &:hover {
+            color: lighten(rgb(5, 32, 121), 30);
+          }
+        }
+      }
+
+      .RadioControls {
+        .Status {
+          color: rgb(0, 255, 0);
+          font-size: 10px;
+          font-weight: 600;
+          font-family: monospace;
+        
+          .StatusWpr {
+            padding-right: 1%;
+          }
+
+          .StatusOnline {
+            color: rgb(0, 255, 0);
+          }
+          
+          .StatusUnknown {
+            color: #ccc;
+          }
+
+          .StatusOffline {
+            color: rgb(255, 0, 0);
+          }
+
+          @include desktop {
+            position: absolute;
+            bottom: 160%;
+            left: 0%;
+            width: 100%;
+            text-align: left;
+          }
+        }
+
+        @include mobile {
+          .Status {
+            background: rgb(58,73,145);
+            background: linear-gradient(0deg, rgba(58,73,145,1) 20%, rgb(51, 52, 70) 100%);
+            border-radius: 1rem;
+            padding: .5rem;
+            margin-bottom: .5rem;
+            @include bezelify();
+
+          }
+
+          @include glossy-pane();
+  
+        }
+
+        @include desktop {
+          position: absolute;
+          width: 60%;
+          bottom: 5%;
+          left: 7%;
+        }      
+      }
+    }
+  }
+}

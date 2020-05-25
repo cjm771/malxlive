@@ -1,0 +1,21 @@
+
+@import './media-queries';
+
+.App {
+  text-align: center;
+
+  *:focus {
+    outline: none !important;
+  }
+
+  .welcome-marquee {
+    img {
+      max-width: 1000px;
+
+      @include desktop {
+        max-width: 1500px;
+      }
+    }
+  }
+}
+
