@@ -1,11 +1,35 @@
-import React, {useEffect, useState} from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faCircle, faVolumeMute, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import React, {useEffect, useState, useRef} from 'react';
+
+// imports
+import { faVolumeMute, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+
+// services
+import RadioService from '../services/RadioService.js';
+import TwitchService from '../services/TwitchService.js';
+
+// components
 import MLTooltip from './MLTooltip.js';
 import RadioPlayer from './RadioPlayer.js';
+import MediaIndicator from './MediaIndicator.js';
+
+// styles
 import PlayerStyle from '../scss/Player.module.scss';
 
 export default function Player(props) {
+  
+  /*********
+   * VARS  *
+   *********/
+
+  // {/* http://stream-relay-geo.ntslive.net/stream2 */}
+  // {/* http://12113.cloudrad.io:9350/live */}
+  const RADIO_STREAM_URL = 'http://stream-relay-geo.ntslive.net/stream2';
+  const RADIO_STATUS_URL = atob("aHR0cHM6Ly9jZG4yLmNsb3VkcmFkLmlvL21hbHgvbGl2ZS9zdHJlYW1pbmZvLmpzb24=");
+  const TWITCH_CHANNEL = 'maddecentlive';
+
+  /*********
+   * HLPRS *
+   *********/
 
   const parseModeFromPath = () => {
     const parsedMode = window.location.pathname.replace('/', '').trim();
@@ -15,35 +39,106 @@ export default function Player(props) {
       return parsedMode;
     }
   };
-  
-
-  const STATUSES = {
-    UNKNOWN: -1, // grey dot
-    OFFLINE: 0, // red dot
-    ONLINE: 1, // green dot 
-    MUTED: 2 , // colored audio off symobol
-  };
-
-  const [mode, setMode] = useState(parseModeFromPath());
-  const [twitchStatus, setTwitchStatus] = useState(STATUSES.UNKNOWN);
-  const [radioStatus, setRadioStatus] = useState(STATUSES.UNKNOWN);
-
-  useEffect(() => {
-    new window.Twitch.Embed("twitch-embed", {
-      channel: "malxxxxx",
-      layout: "video",
-      controls: false
-    });
-  }, []);
-
-  useEffect(() => {
-    window.history.replaceState({}, null, `/${mode}`);
-  }, [mode]);
 
   const handleChange = (e) => {
     setMode(e.target.value);
   };
 
+  const toggleRadioPlayPause = () => {
+    if (radioPlaying) {
+      RadioService.pause();
+    } else {
+      RadioService.play();
+    }
+  };
+
+  const toggleRadioMuteUnmute = () => {
+    if (radioMuted) {
+      RadioService.unmute();
+    } else {
+      RadioService.mute();
+    }
+  };
+
+  const handleRadioVolumeChange = (val) => {
+    RadioService.setVolume(val);
+  };
+
+  /*********
+   * HOOKS *
+   *********/
+
+  // mode
+  const [mode, setMode] = useState(parseModeFromPath());
+  
+  // twitch
+  const [twitchChannelName, setTwitchChannelName] = useState(TwitchService.name);
+  const [twitchStatus, setTwitchStatus] = useState(TwitchService.status);
+  const [twitchMuted, setTwitchMuted] = useState(TwitchService.isMuted);
+  const [twitchPlaying, setTwitchPlaying] = useState(TwitchService.isPlaying);
+
+  // radio
+  const [radioName, setRadioName] = useState(RadioService.name);
+  const [radioStatus, setRadioStatus] = useState(RadioService.status);
+  const [radioVolume, setRadioVolume] = useState(RadioService.volume);
+  const [radioMuted, setRadioMuted] = useState(RadioService.isMuted);
+  const [radioPlaying, setRadioPlaying] = useState(RadioService.isPlaying);
+  const playerRef = useRef();
+
+  // init
+  useEffect(() => {
+    RadioService.registerListener((radioService) => {
+      console.log(
+      'status change..', 
+      'online: ' + radioService.isOnline(), 
+      'isPlaying:' + radioService.isPlaying, 
+      'isMuted:' + radioService.isMuted, 
+      'volume:' + radioService.volume,
+      'name:' +  radioService.name
+      );
+      if (radioStatus !== radioService.status && radioService.status === RadioService.STATUSES.ONLINE) {
+        radioService.play();
+        setRadioPlaying(true);
+        console.log('autoplaying..');
+      }
+      setRadioStatus(radioService.status);
+      setRadioVolume(radioService.volume);
+      setRadioPlaying(radioService.isPlaying);
+      setRadioMuted(radioService.isMuted);
+      setRadioName(radioService.name);
+    });
+    TwitchService.registerListener((twitchService) => {
+      console.log(
+      'status change..', 
+      'online: ' + twitchService.isOnline(), 
+      'isPlaying:' + twitchService.isPlaying, 
+      'isMuted:' + twitchService.isMuted, 
+      'volume:' + twitchService.volume,
+      'name:' +  twitchService.name
+      );
+      setTwitchStatus(twitchService.status);
+      setTwitchMuted(twitchService.isMuted);
+      setTwitchPlaying(twitchService.isPlaying);
+      setTwitchChannelName(twitchService.name);
+    });
+    TwitchService.init(TWITCH_CHANNEL);
+  }, []);
+
+  useEffect(() => {
+    if (playerRef && playerRef.current) {
+      // radio service init
+      RadioService.init(playerRef.current, RADIO_STATUS_URL);
+    }
+  }, [playerRef]);
+
+  useEffect(() => {
+    window.history.replaceState({}, null, `/${mode}`);
+  }, [mode]);
+
+  /*********
+   * RNDR *
+  *********/
+  
   return (
   <div className={PlayerStyle.Container}>
     <div className={PlayerStyle.Player}>
@@ -69,27 +164,52 @@ export default function Player(props) {
             </MLTooltip>
         </div>
         {/* twitch */}
-        <div className={PlayerStyle.Twitch} id="twitch-embed"></div>
+        <div className={`${PlayerStyle.Twitch} ${twitchStatus !== TwitchService.STATUSES.OFFLINE ? PlayerStyle.Online : ''}`} id="twitch-embed"></div>
+        {
+          twitchStatus !== TwitchService.STATUSES.OFFLINE 
+          ? ''
+          : <div className={`${PlayerStyle.Twitch} ${PlayerStyle.NoVid}`}>{
+            twitchChannelName 
+            ? `${twitchChannelName}'s Twitch is not live right now :(` 
+            : 'Twitch Not Live right now :('
+          }
+          </div>
+        }
 
         {/* controls  */}
         <div className={PlayerStyle.RadioControls}>
             {/* status  */}
             <div className={PlayerStyle.Status}>
-              Loading..
-              <span className={`${PlayerStyle.StatusWpr} ${PlayerStyle.StatusOnline}`}>
-                Twitch <FontAwesomeIcon icon={faCircle}></FontAwesomeIcon> 
-              </span>
-              <span className={`${PlayerStyle.StatusWpr} ${PlayerStyle.StatusOnline}`}>
-                Radio <FontAwesomeIcon icon={faCircleNotch} spin></FontAwesomeIcon> 
-              </span>
+              <MediaIndicator 
+                name={
+                  twitchChannelName ? `Twitch: ${twitchChannelName} ` : 'Twitch '
+                }
+                status={twitchStatus}
+                isPlaying={twitchPlaying}
+                isMuted={twitchMuted}
+                notPlayingIcon={faVideoSlash}
+              />
+               <MediaIndicator 
+                name={radioName ? `${radioName} ` : 'Radio '}
+                status={radioStatus}
+                isPlaying={radioPlaying}
+                isMuted={radioMuted}
+                notPlayingIcon={faVolumeMute}
+              />
             </div>
-            <RadioPlayer />
+            <RadioPlayer 
+              playerRef={playerRef} 
+              streamURL={RADIO_STREAM_URL} 
+              isPlaying={radioPlaying}
+              isMuted={radioMuted}
+              volume={radioVolume}
+              onPlayPauseClick={() => { toggleRadioPlayPause() }}
+              onMuteUnmuteClick={() => { toggleRadioMuteUnmute() }}
+              onVolumeChange={(val) => { handleRadioVolumeChange(val) }}
+            />
         </div>
         {/* logo */}
-        <img src="/logo192.png" className={PlayerStyle.MLLogo} />
-        {/* <video className={PlayerStyle}> controls>
-          <source src="http://12113.cloudrad.io:9350/live" type="audio/mpeg" />
-        </video>  */}
+        <img src="/logo192.png" alt="" className={PlayerStyle.MLLogo} />
       </div>
     </div>
   </div>

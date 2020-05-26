@@ -27,7 +27,8 @@
 
   .Player {
     width: 100%;
-    padding-bottom: 56.25%;
+    // padding-bottom: 56.25%;
+    padding-bottom: 73.9%;
     position: relative;
     
     .MLLogo {
@@ -40,7 +41,7 @@
       @include desktop {
         left: auto;
         right: 5%;
-        bottom: 6%
+        bottom: 6.5%;
       }
     }
 
@@ -77,10 +78,33 @@
         width: 92.5%;
         height:70%;
         left: 5.5%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-size: 10px;
+        font-style: italic;
+        font-family: 'Courier New', Courier, monospace;
+
+        &.NoVid {
+          padding: 1rem;
+          font-weight: 800;
+        }
+
+        @include desktop {
+          font-size: 1rem;
+        }
 
         iframe {
           width: 100%;
           height: 100%;
+          display: none;
+        }
+
+        &.Online {
+          iframe {
+            display: block;;
+          }
         }
       }
 
@@ -154,26 +178,10 @@
           font-size: 10px;
           font-weight: 600;
           font-family: monospace;
-        
-          .StatusWpr {
-            padding-right: 1%;
-          }
-
-          .StatusOnline {
-            color: rgb(0, 255, 0);
-          }
-          
-          .StatusUnknown {
-            color: #ccc;
-          }
-
-          .StatusOffline {
-            color: rgb(255, 0, 0);
-          }
 
           @include desktop {
             position: absolute;
-            bottom: 160%;
+            bottom: 210%;
             left: 0%;
             width: 100%;
             text-align: left;

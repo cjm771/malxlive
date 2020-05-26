@@ -1,0 +1,19 @@
+.MediaIndicator {
+  padding-right: 1%;
+
+  &.StatusOnline {
+    color: rgb(0, 255, 0);
+
+    &.DeEmphasize {
+      opacity: 0.6;
+    }
+  }
+  
+  &.StatusUnknown {
+    color: #ccc;
+  }
+
+  &.StatusOffline {
+    color: rgb(255, 0, 0);
+  }
+}

@@ -6,7 +6,7 @@ function App() {
 
   return (
     <div className="App">
-        <marquee class="welcome-marquee"><img src="/assets/welcome.jpg" alt="Welcome-text"></img></marquee>
+        <marquee className="welcome-marquee"><img src="/assets/welcome.jpg" alt="Welcome-text"></img></marquee>
         <Player></Player>
     </div>
   );

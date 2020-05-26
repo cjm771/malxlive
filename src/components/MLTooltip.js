@@ -2,7 +2,7 @@ import React from 'react';
 import {OverlayTrigger, Tooltip} from 'react-bootstrap';
 
 
-export default function MLTooltip ({id, text, placement, children, ...props}) {
+export default function MLTooltip ({id, text, placement, children}) {
   return (
     <OverlayTrigger
       placement={placement || 'auto'}

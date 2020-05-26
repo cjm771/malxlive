@@ -5,41 +5,52 @@ import {faVolumeUp, faVolumeMute, faPlay, faPause } from '@fortawesome/free-soli
 import RadioPlayerStyle from '../scss/RadioPlayer.module.scss';
 import ReactSlider from 'react-slider';
 
-export default function RadioPlayer(props) {
+export default function RadioPlayer({
+  playerRef, 
+  streamURL,
+  isPlaying,
+  isMuted,
+  volume,
+  onPlayPauseClick,
+  onMuteUnmuteClick,
+  onVolumeChange
+}) {
 
-  const [volume, setVolume] = useState(50);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
+  /*********
+   * HOOKS *
+   *********/
+  
+  /*********
+   * RNDR  *
+   *********/
 
   return (
     <div className={RadioPlayerStyle.Player}>
-      <div className={RadioPlayerStyle.PlayerInner}>
-        <button clasName={RadioPlayerStyle.Button} onClick={() => { setIsPlaying(!isPlaying) }}>
+      <div className={`${RadioPlayerStyle.PlayerInner} ${isMuted ? RadioPlayerStyle.Disabled : ''}`}>
+        <button className={RadioPlayerStyle.Button} onClick={() => { onPlayPauseClick() }}>
           {
             isPlaying 
             ? <FontAwesomeIcon icon={faPause}></FontAwesomeIcon>
             : <FontAwesomeIcon icon={faPlay}></FontAwesomeIcon>
           }
         </button>
-        <button className={RadioPlayerStyle.Button} onClick={() => { setIsMuted(!isMuted) }}>
+        <button className={RadioPlayerStyle.Button} onClick={() => { onMuteUnmuteClick() }}>
           {
             isMuted 
-            ? <FontAwesomeIcon icon={faVolumeUp}></FontAwesomeIcon>
-            : <FontAwesomeIcon icon={faVolumeMute}></FontAwesomeIcon>
+            ? <FontAwesomeIcon icon={faVolumeMute}></FontAwesomeIcon>
+            : <FontAwesomeIcon icon={faVolumeUp}></FontAwesomeIcon>
           }
         </button>
-        
-        {/* <FontAwesomeIcon icon={faVolumeUp}></FontAwesomeIcon> */}
-        <ReactSlider
-            className={RadioPlayerStyle.Slider}
-            thumbClassName={RadioPlayerStyle.Thumb}
-            trackClassName={RadioPlayerStyle.Track}
-            // onBeforeChange={val => console.log('onBeforeChange value:', val)}
-            onChange={val => setVolume(val)}
-            // onAfterChange={val => console.log('onAfterChange value:', val)}
-            renderThumb={(props, state) => <div {...props}></div>}
-            value={volume}
-        />
+          <ReactSlider
+              thumbClassName={RadioPlayerStyle.Thumb}
+              trackClassName={RadioPlayerStyle.Track}
+              onChange={val => onVolumeChange(val / 100)}
+              renderThumb={(props, state) => <div {...props}></div>}
+              value={volume * 100}
+          />
+        <video className={RadioPlayerStyle.RadioEmbed} ref={playerRef}>
+          <source src={streamURL} type="audio/mpeg" />
+        </video> 
       </div>
     </div>
   );
