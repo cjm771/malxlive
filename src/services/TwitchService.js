@@ -35,6 +35,12 @@ export default new class TwitchService extends BaseMediaSevice {
   setupPlayerListeners() {
     this.startPolling();
 
+    this.embed.addEventListener(this.twitch.Player.ERROR, () => {
+      this.stopPolling();
+      this.setOnline(false, 'Error ocurred..');
+      this.update();
+    });
+
     this.embed.addEventListener(this.twitch.Player.PAUSE, () => {
       this.stopPolling();
       this.setPaused(true);
