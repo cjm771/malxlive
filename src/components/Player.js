@@ -23,9 +23,9 @@ export default function Player(props) {
 
   // {/* http://stream-relay-geo.ntslive.net/stream2 */}
   // {/* http://12113.cloudrad.io:9350/live */}
-  const RADIO_STREAM_URL = 'http://stream-relay-geo.ntslive.net/stream2';
+  const RADIO_STREAM_URL = 'http://12113.cloudrad.io:9350/live';
   const RADIO_STATUS_URL = atob("aHR0cHM6Ly9jZG4yLmNsb3VkcmFkLmlvL21hbHgvbGl2ZS9zdHJlYW1pbmZvLmpzb24=");
-  const TWITCH_CHANNEL = 'maddecentlive';
+  const TWITCH_CHANNEL = 'malxxxxx';
 
   /*********
    * HLPRS *
