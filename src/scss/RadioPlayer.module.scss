@@ -2,12 +2,67 @@
 @import './mixins';
 
 $slider-height: 5px;
+$interaction-needed-color: rgb(16, 120, 255);
+$interation-needed-color-2: rgb(10, 255, 51);
+
+@mixin disabled() {
+  
+  :global {
+    .slider {
+      pointer-events: none;
+      cursor: not-allowed;
+      opacity: .6;
+    }
+  }
+
+
+  .Track {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: .6;
+    &:first-child {
+      background: #bbb !important;
+    }
+  }
+}
 
 .Player {
 
+  .SimpleMessage {
+    font-weight: 600;
+    font-family: Courier, monospace;
+    font-size: 14px;
+    color: #aaaa;
+    line-height: 35px;
+
+    &.InteractionNeeded {
+      background: linear-gradient(to right, $interation-needed-color-2 10%, $interaction-needed-color 20%, $interaction-needed-color 80%,$interation-needed-color-2 90%);
+      background-size: 200% auto;
+      cursor: pointer;
+
+      color: #000;
+      background-clip: text;
+      text-fill-color: transparent;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 2.5s linear infinite;
+    }
+  }
+
+  &.Disabled {
+    @include disabled();
+
+    button {
+      opacity: .6;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+  }
+  
   .PlayerInner {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     justify-content: center;
 
     @include desktop {
@@ -15,21 +70,8 @@ $slider-height: 5px;
     }
 
     &.Disabled {
-      :global {
-        .slider {
-          pointer-events: none;
-          cursor: not-allowed;
-          opacity: .6;
-        }
-      }
+      @include disabled();
    
-      .Track {
-        pointer-events: none;
-        opacity: .6;
-        &:first-child {
-          background: #bbb;
-        }
-      }
     }
 
     :global {
@@ -68,7 +110,32 @@ $slider-height: 5px;
         background: rgb(0, 255, 0);
         height: $slider-height;
       }
-  
     }
+
+    .DisabledMessage {
+      width: 100%;
+
+      @include mobile {
+        padding-top: 5px;
+      }
+
+      @include desktop() {
+        top: -55%;
+        left: 0%;
+        position: absolute;
+        text-align: left;
+        opacity: 0.4;
+      }
+      font-size: 10px;
+      text-align: center;
+      padding: 0 1rem;
+      opacity: 0.6;
+    }
+  }
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
   }
 }

@@ -11,13 +11,15 @@ export default new class TwitchService extends BaseMediaSevice {
     this.embed = new this.twitch.Embed("twitch-embed", {
       channel,
       layout: "video",
-      controls: true
+      controls: true,
+      muted: false
     });
 
     this.embed.addEventListener(this.twitch.Embed.VIDEO_READY, () => {
       this.setupPlayerListeners();
       this.player = this.embed.getPlayer(); 
-      this.player.play();
+      this.embed.play();
+      this.embed.setMuted(this.isMuted);
       this.update();
     });
   }
@@ -47,16 +49,16 @@ export default new class TwitchService extends BaseMediaSevice {
     });
   }
 
-  update() {
-    this.updateVolumeFromTwitch();
+  update(opts={}) {
+    this.updateVolumeFromTwitch(opts);
     this.updateNameFromTwitch();
     this.triggerChange();
   }
 
   poll() {
     if (
-      this.isMuted !== this.player.getMuted() ||
-      this.volume !== this.player.getVolume() || 
+      this.isMuted !== this.embed.getMuted() ||
+      this.volume !== this.embed.getVolume() || 
       this.player.getChannel() !== this.name
     ) {
       this.update();
@@ -64,23 +66,25 @@ export default new class TwitchService extends BaseMediaSevice {
   }
 
   updateNameFromTwitch() {
-    this.name = this.player.getChannel();
+    if (this.player) {
+      this.name = this.player.getChannel();
+    }
   }
 
-  updateVolumeFromTwitch() {
-    this.isMuted = this.player.getMuted();
-    this.volume = this.player.getVolume();
+  updateVolumeFromTwitch(opts={}) {
+      if (opts.forceMute !== undefined) {
+        this.isMuted = opts.forceMute;
+      }
+      this.volume = this.embed.getVolume();
   }
 
   setPaused(isPaused) {
-    console.log('setting is paused to..', isPaused);
     this.isPlaying = !isPaused;
-    console.log('is playing...?',this.isPlaying)
   }
 
   setMuted(shouldMute) {
-    this.player.setMuted(shouldMute);
-    this.update();
+    this.embed.setMuted(shouldMute);
+    this.update({forceMute: shouldMute});
   }
 
 }();

@@ -64,6 +64,18 @@ export default function Player(props) {
     RadioService.setVolume(val);
   };
 
+  const getRadioDisabled = () => {
+    // check if mode is twitch..
+    if (mode === 'twitch') {
+      return 'Radio Playback disabled in this mode, use twitch controls';
+    } else if (radioStatus !== RadioService.STATUSES.ONLINE) {
+      return 'Radio Offline :(';
+    }
+     else {
+        return false;
+    }
+  }
+
   /*********
    * HOOKS *
    *********/
@@ -83,45 +95,30 @@ export default function Player(props) {
   const [radioVolume, setRadioVolume] = useState(RadioService.volume);
   const [radioMuted, setRadioMuted] = useState(RadioService.isMuted);
   const [radioPlaying, setRadioPlaying] = useState(RadioService.isPlaying);
+  const [radioInteractionNeeded, setRadioInteractionNeeded] = useState(false);
   const playerRef = useRef();
 
   // init
   useEffect(() => {
+
     RadioService.registerListener((radioService) => {
-      console.log(
-      'status change..', 
-      'online: ' + radioService.isOnline(), 
-      'isPlaying:' + radioService.isPlaying, 
-      'isMuted:' + radioService.isMuted, 
-      'volume:' + radioService.volume,
-      'name:' +  radioService.name
-      );
-      if (radioStatus !== radioService.status && radioService.status === RadioService.STATUSES.ONLINE) {
-        radioService.play();
-        setRadioPlaying(true);
-        console.log('autoplaying..');
-      }
+      setRadioInteractionNeeded(radioService.interactionNeeded)
       setRadioStatus(radioService.status);
       setRadioVolume(radioService.volume);
       setRadioPlaying(radioService.isPlaying);
       setRadioMuted(radioService.isMuted);
       setRadioName(radioService.name);
     });
+    
     TwitchService.registerListener((twitchService) => {
-      console.log(
-      'status change..', 
-      'online: ' + twitchService.isOnline(), 
-      'isPlaying:' + twitchService.isPlaying, 
-      'isMuted:' + twitchService.isMuted, 
-      'volume:' + twitchService.volume,
-      'name:' +  twitchService.name
-      );
       setTwitchStatus(twitchService.status);
       setTwitchMuted(twitchService.isMuted);
       setTwitchPlaying(twitchService.isPlaying);
       setTwitchChannelName(twitchService.name);
     });
+    TwitchService.isMuted = mode === 'discord' ? true : false;
     TwitchService.init(TWITCH_CHANNEL);
+
   }, []);
 
   useEffect(() => {
@@ -132,6 +129,17 @@ export default function Player(props) {
   }, [playerRef]);
 
   useEffect(() => {
+    if (mode === 'discord') {
+
+      RadioService.play();
+      RadioService.unmute();
+      TwitchService.setMuted(true);
+    } else {
+      console.log()
+      RadioService.pause();
+      RadioService.mute();
+      TwitchService.setMuted(false);
+    }
     window.history.replaceState({}, null, `/${mode}`);
   }, [mode]);
 
@@ -198,14 +206,16 @@ export default function Player(props) {
               />
             </div>
             <RadioPlayer 
+              interactionNeeded={radioInteractionNeeded}
               playerRef={playerRef} 
               streamURL={RADIO_STREAM_URL} 
               isPlaying={radioPlaying}
               isMuted={radioMuted}
               volume={radioVolume}
-              onPlayPauseClick={() => { toggleRadioPlayPause() }}
+              onPlayPauseClick={() => { console.log('changing...'); toggleRadioPlayPause() }}
               onMuteUnmuteClick={() => { toggleRadioMuteUnmute() }}
               onVolumeChange={(val) => { handleRadioVolumeChange(val) }}
+              disabled={getRadioDisabled()}
             />
         </div>
         {/* logo */}

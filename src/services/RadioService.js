@@ -7,6 +7,8 @@ export default new class RadioService extends BaseMediaSevice {
   volume = 0.5;
   POLLING_INTERVAL = 10000;
   statusURL = null;
+  firstOnline = null;
+  interactionNeeded = null;
 
   init(el, statusURL) {
     if (el) {
@@ -22,34 +24,42 @@ export default new class RadioService extends BaseMediaSevice {
   }
 
   play() {
-    this.isPlaying = true;
-    this.setVolume(this.volume, false);
-    this.audioAPI.play();
-    // this.triggerChange();
+      if (!this.isPlaying && this.isOnline()) {
+        return this.audioAPI.play().then(() => {
+          this.interactionNeeded = false;
+          this.isPlaying = true;
+          this.setVolume(this.volume, false);    
+        }).catch((e) => {
+          this.interactionNeeded = true;
+        }).finally(() => {
+          this.triggerChange();
+        });
+      } 
   }
 
   pause() {
     this.isPlaying = false;
     this.audioAPI.pause();
-    // this.triggerChange();
+    this.triggerChange();
   }
 
   mute() {
     this.isMuted = true;
-    this.audioAPI.mute = true;
-    // this.triggerChange();
+    this.audioAPI.muted = true;
+    this.triggerChange();
   }
 
   unmute() {
     this.isMuted = false;
-    this.audioAPI.mute = false;
-    // this.triggerChange();
+    this.audioAPI.muted = false;
+    this.triggerChange();
   }
 
   setVolume(val, triggerChange=true) {
     this.audioAPI.volume = val;
+    this.volume = val;
     if (triggerChange) {
-      // this.triggerChange();
+      this.triggerChange();
     }
   }
 
@@ -59,14 +69,28 @@ export default new class RadioService extends BaseMediaSevice {
       message !== this.statusMessage || 
       (metaData && (this.name !== metaData.title))
     ) {
-      if (!isOnline) {
+      // pause when gone offline
+      if (!isOnline && this.isPlaying) {
         this.pause();
+      } 
+      // if first time going online set to true
+      if (this.firstOnline === null && isOnline) {
+        this.firstOnline = true;
       }
+      // update cycle
       this.setOnline(isOnline, message);
+      //  play when come online
+      if (isOnline) {
+        this.play();
+      }
       if (metaData) {
         this.name = metaData.title;
       }
       this.triggerChange();
+      // mark first online as complete
+      if (this.firstOnline === true) {
+        this.firstOnline = false;
+      }
     }
   }
 
@@ -74,14 +98,11 @@ export default new class RadioService extends BaseMediaSevice {
     if (this.statusURL) {
       Axios.get(this.statusURL).then((resp) => {
         if (resp.data) {
-          console.log(resp.data.source);
           this.update(resp.data.source === 'Connected' ? true : false, null, resp.data);
         } else {
-          console.log('something else..',resp);
           this.update(false, `Network error when pulling status`, null);
         }
       }).catch((e) => {
-        console.log('something..e', e);
         this.update(false, `Network error when pulling status: ${e}`, null);
       });
     }

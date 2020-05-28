@@ -2,7 +2,7 @@ import React from 'react';
 
 // imports
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faCircle, faVolumeMute, faCircleNotch, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import {faCircle, faVolumeMute, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 // services
 import TwitchService from '../services/TwitchService.js';
