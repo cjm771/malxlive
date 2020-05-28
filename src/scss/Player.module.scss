@@ -30,20 +30,6 @@
     // padding-bottom: 56.25%;
     padding-bottom: 73.9%;
     position: relative;
-    
-    .MLLogo {
-      position: absolute;
-      height: auto;
-      width: 3%;
-      bottom: 11%;
-      left: 7%;
-
-      @include desktop {
-        left: auto;
-        right: 5%;
-        bottom: 6.5%;
-      }
-    }
 
     .Mobile {
       display: none;
@@ -85,10 +71,30 @@
         font-size: 10px;
         font-style: italic;
         font-family: 'Courier New', Courier, monospace;
-
+        overflow: hidden;
+        overflow-y: auto;
         &.NoVid {
           padding: 1rem;
           font-weight: 800;
+          background: url('/assets/visual1.gif');
+          background-size: 100% 100%;
+          opacity: 0.8;
+        }
+
+        &.Overlay {
+          background: rgba(0, 0, 0, 0.75);
+          color: #fff;
+          padding: 1%;
+          // font-size: 8px;
+          font-weight: 800;
+          @include mobile {
+            align-items: flex-start;
+          }
+         
+
+          button {
+            @include buttonify();
+          }
         }
 
         @include desktop {
@@ -185,6 +191,46 @@
             left: 0%;
             width: 100%;
             text-align: left;
+          }
+        }
+
+        .IconDock {
+          position: relative;
+          vertical-align: middle;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-shadow: 3px 6px #272634;
+    
+          svg {
+            color: rgb(192, 192, 192);
+            font-size: 1rem;
+            filter: drop-shadow(2px 2px 0px rgb(122, 122, 122))
+          }
+    
+          svg, img {
+            margin-left: 5px;
+          }
+    
+          .MLLogo {
+            width: auto;
+            height: 25px;
+          }
+    
+          @include desktop {
+            flex-direction: row-reverse;
+            position: absolute;
+            left: auto;
+            right: -46%;
+            bottom: 20%;
+            .MLLogo {
+              width: auto;
+              height: 20px;
+            }
+            svg {
+              filter: drop-shadow(1px 1px 0px rgb(122, 122, 122))
+            }
+            
           }
         }
 

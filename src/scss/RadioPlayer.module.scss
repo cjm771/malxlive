@@ -83,7 +83,7 @@ $interation-needed-color-2: rgb(10, 255, 51);
     }
   
     button {
-      @include buttonify(35px);
+      @include roundButtonify(35px);
       margin-left: 2%;
       display: flex;
       justify-content: center;
@@ -91,7 +91,7 @@ $interation-needed-color-2: rgb(10, 255, 51);
     }
   
     .Thumb {
-      @include buttonify(1rem);
+      @include roundButtonify(1rem);
       top: -50%;
     }
 

@@ -13,13 +13,11 @@
   @include bezelify();
 }
 
-@mixin buttonify($width) {
+@mixin buttonify() {
   @include gradientify();
-  border-radius: 50%;
   border: none;
-  color: rgb(103, 127, 204);
-  width: $width;
-  height: $width;
+  
+  border-radius: 5px;
   cursor: pointer;
   transition: background 2s ease-in-out;
 
@@ -27,4 +25,12 @@
     background: darken(rgb(232,241,247), 10);
     background: linear-gradient(184deg, darken(rgba(232,241,247,1), 10) 0%, darken(rgba(172,206,255,1), 10) 100%);
   }
+}
+
+@mixin roundButtonify($width) {
+  color: rgb(103, 127, 204);
+  @include buttonify();
+  border-radius: 50%;
+  width: $width;
+  height: $width;
 }

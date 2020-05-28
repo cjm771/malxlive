@@ -5,6 +5,8 @@ export default new class TwitchService extends BaseMediaSevice {
   twitch = window.Twitch;
   embed = null;
   player = null;
+  TIMEOUT = 10000;
+  timer = null;
 
   
   init(channel) {
@@ -15,7 +17,13 @@ export default new class TwitchService extends BaseMediaSevice {
       muted: false
     });
 
+    // timeout
+    this.timer = setTimeout(() => {
+      this.setOnline(false, 'Timeout occurred');
+    }, this.TIMEOUT);
+
     this.embed.addEventListener(this.twitch.Embed.VIDEO_READY, () => {
+      clearTimeout(this.timer);
       this.setupPlayerListeners();
       this.player = this.embed.getPlayer(); 
       this.embed.play();
