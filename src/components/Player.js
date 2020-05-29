@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 
 // imports
-import { faVolumeMute, faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import { faVideoSlash } from '@fortawesome/free-solid-svg-icons';
 import { faTwitch, faDiscord } from '@fortawesome/free-brands-svg-icons';
 
 // services
@@ -23,9 +23,12 @@ export default function Player(props) {
    * VARS  *
    *********/
 
+  // TODO sources and modes config
+  // define on and off for each source (which would be by service) and modes set this up..
+
   // {/* http://stream-relay-geo.ntslive.net/stream2 */}
-  const RADIO_STREAM_URL = 'http://stream-relay-geo.ntslive.net/stream2';
-  // const RADIO_STREAM_URL = 'http://12113.cloudrad.io:9350/live';
+  // const RADIO_STREAM_URL = 'http://stream-relay-geo.ntslive.net/stream2';
+  const RADIO_STREAM_URL = 'http://12113.cloudrad.io:9350/live';
   const RADIO_STATUS_URL = atob("aHR0cHM6Ly9jZG4yLmNsb3VkcmFkLmlvL21hbHgvbGl2ZS9zdHJlYW1pbmZvLmpzb24=");
   const TWITCH_CHANNEL = 'malxxxxx';
   const DISCORD_ID = 'jr4bHKa';
@@ -48,17 +51,15 @@ export default function Player(props) {
   };
 
   const toggleRadioPlayPause = () => {
-    console.log(radioPlaying);
-    if (radioPlaying) {
+    if (radioState.radioPlaying) {
       RadioService.pause();
     } else {
-      console.log('playing...');
       RadioService.play();
     }
   };
 
   const toggleRadioMuteUnmute = () => {
-    if (radioMuted) {
+    if (radioState.radioMuted) {
       RadioService.unmute();
     } else {
       RadioService.mute();
@@ -66,7 +67,6 @@ export default function Player(props) {
   };
 
   const handleRadioVolumeChange = (val) => {
-    console.log('setting..', val);
     RadioService.setVolume(val);
   };
 
@@ -74,7 +74,7 @@ export default function Player(props) {
     // check if mode is twitch..
     if (mode === 'twitch') {
       return 'Radio Playback disabled in this mode, use twitch controls';
-    } else if (radioStatus !== RadioService.STATUSES.ONLINE) {
+    } else if (radioState.radioStatus !== RadioService.STATUSES.ONLINE) {
       return 'Radio Offline :(';
     }
      else {
@@ -99,25 +99,26 @@ export default function Player(props) {
   const [twitchPlaying, setTwitchPlaying] = useState(TwitchService.isPlaying);
 
   // radio
-  const [radioName, setRadioName] = useState(RadioService.name);
-  const [radioStatus, setRadioStatus] = useState(RadioService.status);
-  const [radioVolume, setRadioVolume] = useState(RadioService.volume);
-  const [radioMuted, setRadioMuted] = useState(RadioService.isMuted);
-  const [radioPlaying, setRadioPlaying] = useState(RadioService.isPlaying);
-  const [radioInteractionNeeded, setRadioInteractionNeeded] = useState(false);
-  const playerRef = useRef();
+  const radioState = {};
+  [radioState.radioName, radioState.setRadioName] = useState(RadioService.name);
+  [radioState.radioStatus, radioState.setRadioStatus] = useState(RadioService.status);
+  [radioState.radioVolume, radioState.setRadioVolume] = useState(RadioService.volume);
+  [radioState.radioMuted, radioState.setRadioMuted] = useState(RadioService.isMuted);
+  [radioState.radioPlaying, radioState.setRadioPlaying] = useState(RadioService.isPlaying);
+  [radioState.radioInteractionNeeded, radioState.setRadioInteractionNeeded] = useState(false);
+  radioState.playerRef = useRef();
 
   // init
   useEffect(() => {
 
     RadioService.registerListener((radioService) => {
       // radio autoplay
-      setRadioInteractionNeeded(radioService.interactionNeeded);
-      setRadioStatus(radioService.status);
-      setRadioVolume(radioService.volume);
-      setRadioPlaying(radioService.isPlaying);
-      setRadioMuted(radioService.isMuted);
-      setRadioName(radioService.name);
+      radioState.setRadioInteractionNeeded(radioService.interactionNeeded);
+      radioState.setRadioStatus(radioService.status);
+      radioState.setRadioVolume(radioService.volume);
+      radioState.setRadioPlaying(radioService.isPlaying);
+      radioState.setRadioMuted(radioService.isMuted);
+      radioState.setRadioName(radioService.name);
 
     });
     
@@ -133,18 +134,18 @@ export default function Player(props) {
   }, []);
 
   useEffect(() => {
-    if (playerRef && playerRef.current) {
+    if (radioState.playerRef && radioState.playerRef.current) {
       // radio service init
-      RadioService.init(playerRef.current, RADIO_STATUS_URL);
+      RadioService.init(radioState.playerRef.current, RADIO_STATUS_URL);
     }
-  }, [playerRef]);
+  }, [radioState.playerRef]);
 
   // autoplay radio when online
   useEffect(() => {
     if (RadioService.isOnline() && mode === 'discord') {
       RadioService.play();
     }
-  }, [radioStatus]);
+  }, [radioState.radioStatus]);
 
   // modeswitch
   useEffect(() => {
@@ -229,22 +230,22 @@ export default function Player(props) {
                 notPlayingIcon={faVideoSlash}
               />
                <MediaIndicator 
-                name={radioName ? `${radioName} ` : 'Radio '}
-                status={radioStatus}
-                isPlaying={radioPlaying}
-                isMuted={radioMuted}
-                notPlayingIcon={faVolumeMute}
+                name={radioState.radioName ? `${radioState.radioName} ` : 'Radio '}
+                status={radioState.radioStatus}
+                isPlaying={radioState.radioPlaying}
+                isMuted={radioState.radioMuted}
+                notPlayingIcon={radioState.faVolumeMute}
               />
             </div>
             <RadioPlayer 
-              interactionNeeded={radioInteractionNeeded}
-              playerRef={playerRef} 
+              interactionNeeded={radioState.radioInteractionNeeded}
+              playerRef={radioState.playerRef} 
               streamURL={RADIO_STREAM_URL} 
-              isPlaying={radioPlaying}
-              isMuted={radioMuted}
-              volume={radioVolume}
+              isPlaying={radioState.radioPlaying}
+              isMuted={radioState.radioMuted}
+              volume={radioState.radioVolume}
               hideVolumeSlider={!RadioService.deviceSupportsVolumeControl()}
-              onPlayPauseClick={() => { console.log('changing...'); toggleRadioPlayPause() }}
+              onPlayPauseClick={() => { toggleRadioPlayPause() }}
               onMuteUnmuteClick={() => { toggleRadioMuteUnmute() }}
               onVolumeChange={(val) => { handleRadioVolumeChange(val) }}
               disabled={getRadioDisabled()}

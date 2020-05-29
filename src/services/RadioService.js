@@ -25,19 +25,14 @@ export default new class RadioService extends BaseMediaSevice {
   }
 
   play() {
-      console.log('is not playing?', !this.isPlaying, 'online:',this.isOnline());
       if (!this.isPlaying && this.isOnline()) {
-        console.log('weeee attempting to play..');
         return this.audioAPI.play().then(() => {
           this.interactionNeeded = false;
-          console.log('interaction needed:', this.interactionNeeded);
           this.isPlaying = true;
           this.setVolume(this.volume, false);    
         }).catch((e) => {
-          console.log('error while attempting to play:', e);
           this.interactionNeeded = true;
         }).finally(() => {
-          console.log('finished..');
           this.triggerChange();
         });
       } 
@@ -70,10 +65,8 @@ export default new class RadioService extends BaseMediaSevice {
   }
 
   setVolume(val, triggerChange=true) {
-    console.log(this.audioAPI.volume);
     this.audioAPI.volume = val;
     this.volume = val;
-    console.log(this.audioAPI.volume);
     if (triggerChange) {
       this.triggerChange();
     }

@@ -51,7 +51,7 @@ export default function RadioPlayer({
               <ReactSlider
                 thumbClassName={RadioPlayerStyle.Thumb}
                 trackClassName={RadioPlayerStyle.Track}
-                onChange={val => {console.log('changing to...' + val); onVolumeChange(val / 100);}}
+                onChange={val => {onVolumeChange(val / 100);}}
                 renderThumb={(props, state) => <div {...props}></div>}
                 value={volume * 100}
             /> : ''
