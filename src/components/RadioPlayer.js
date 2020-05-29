@@ -53,7 +53,7 @@ export default function RadioPlayer({
                 renderThumb={(props, state) => <div {...props}></div>}
                 value={volume * 100}
             />
-          <video className={RadioPlayerStyle.RadioEmbed} ref={playerRef}>
+          <video className={RadioPlayerStyle.RadioEmbed} ref={playerRef} playsinline>
             <source src={streamURL} type="audio/mpeg" />
           </video> 
           { disabled ? <i className={RadioPlayerStyle.DisabledMessage}>{disabled}</i> : ''}
