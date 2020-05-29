@@ -9,10 +9,12 @@ export default new class RadioService extends BaseMediaSevice {
   statusURL = null;
   firstOnline = null;
   interactionNeeded = null;
+  
 
   init(el, statusURL) {
     if (el) {
       this.audioAPI = el;
+      this.src = this.audioAPI.children[0].src;
       this.startPolling();
     } else {
       this.stopPolling();
@@ -24,14 +26,19 @@ export default new class RadioService extends BaseMediaSevice {
   }
 
   play() {
+      console.log('is not playing?', !this.isPlaying, 'online:',this.isOnline());
       if (!this.isPlaying && this.isOnline()) {
+        console.log('weeee attempting to play..');
         return this.audioAPI.play().then(() => {
           this.interactionNeeded = false;
+          console.log('interaction needed:', this.interactionNeeded);
           this.isPlaying = true;
           this.setVolume(this.volume, false);    
         }).catch((e) => {
+          console.log('error while attempting to play:', e);
           this.interactionNeeded = true;
         }).finally(() => {
+          console.log('finished..');
           this.triggerChange();
         });
       } 
@@ -79,10 +86,6 @@ export default new class RadioService extends BaseMediaSevice {
       }
       // update cycle
       this.setOnline(isOnline, message);
-      //  play when come online
-      if (isOnline) {
-        this.play();
-      }
       if (metaData) {
         this.name = metaData.title;
       }

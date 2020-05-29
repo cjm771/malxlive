@@ -24,8 +24,8 @@ export default function Player(props) {
    *********/
 
   // {/* http://stream-relay-geo.ntslive.net/stream2 */}
-  // {/* http://12113.cloudrad.io:9350/live */}
-  const RADIO_STREAM_URL = 'http://12113.cloudrad.io:9350/live';
+  const RADIO_STREAM_URL = 'http://stream-relay-geo.ntslive.net/stream2';
+  // const RADIO_STREAM_URL = 'http://12113.cloudrad.io:9350/live';
   const RADIO_STATUS_URL = atob("aHR0cHM6Ly9jZG4yLmNsb3VkcmFkLmlvL21hbHgvbGl2ZS9zdHJlYW1pbmZvLmpzb24=");
   const TWITCH_CHANNEL = 'malxxxxx';
   const DISCORD_ID = 'jr4bHKa';
@@ -48,9 +48,11 @@ export default function Player(props) {
   };
 
   const toggleRadioPlayPause = () => {
+    console.log(radioPlaying);
     if (radioPlaying) {
       RadioService.pause();
     } else {
+      console.log('playing...');
       RadioService.play();
     }
   };
@@ -108,12 +110,14 @@ export default function Player(props) {
   useEffect(() => {
 
     RadioService.registerListener((radioService) => {
-      setRadioInteractionNeeded(radioService.interactionNeeded)
+      // radio autoplay
+      setRadioInteractionNeeded(radioService.interactionNeeded);
       setRadioStatus(radioService.status);
       setRadioVolume(radioService.volume);
       setRadioPlaying(radioService.isPlaying);
       setRadioMuted(radioService.isMuted);
       setRadioName(radioService.name);
+
     });
     
     TwitchService.registerListener((twitchService) => {
@@ -134,14 +138,20 @@ export default function Player(props) {
     }
   }, [playerRef]);
 
+  // autoplay radio when online
+  useEffect(() => {
+    if (RadioService.isOnline() && mode === 'discord') {
+      RadioService.play();
+    }
+  }, [radioStatus]);
+
+  // modeswitch
   useEffect(() => {
     if (mode === 'discord') {
-
       RadioService.play();
       RadioService.unmute();
       TwitchService.setMuted(true);
     } else {
-      console.log()
       RadioService.pause();
       RadioService.mute();
       TwitchService.setMuted(false);
