@@ -9,12 +9,11 @@ export default new class RadioService extends BaseMediaSevice {
   statusURL = null;
   firstOnline = null;
   interactionNeeded = null;
-  
+
 
   init(el, statusURL) {
     if (el) {
       this.audioAPI = el;
-      this.src = this.audioAPI.children[0].src;
       this.startPolling();
     } else {
       this.stopPolling();
@@ -62,9 +61,19 @@ export default new class RadioService extends BaseMediaSevice {
     this.triggerChange();
   }
 
+  isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+
+  deviceSupportsVolumeControl() {
+    return !this.isIOS();
+  }
+
   setVolume(val, triggerChange=true) {
+    console.log(this.audioAPI.volume);
     this.audioAPI.volume = val;
     this.volume = val;
+    console.log(this.audioAPI.volume);
     if (triggerChange) {
       this.triggerChange();
     }

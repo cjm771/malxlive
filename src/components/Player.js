@@ -66,6 +66,7 @@ export default function Player(props) {
   };
 
   const handleRadioVolumeChange = (val) => {
+    console.log('setting..', val);
     RadioService.setVolume(val);
   };
 
@@ -242,6 +243,7 @@ export default function Player(props) {
               isPlaying={radioPlaying}
               isMuted={radioMuted}
               volume={radioVolume}
+              hideVolumeSlider={!RadioService.deviceSupportsVolumeControl()}
               onPlayPauseClick={() => { console.log('changing...'); toggleRadioPlayPause() }}
               onMuteUnmuteClick={() => { toggleRadioMuteUnmute() }}
               onVolumeChange={(val) => { handleRadioVolumeChange(val) }}

@@ -15,7 +15,8 @@ export default function RadioPlayer({
   onMuteUnmuteClick,
   onVolumeChange,
   interactionNeeded,
-  disabled
+  disabled,
+  hideVolumeSlider
 }) {
 
   /*********
@@ -46,16 +47,19 @@ export default function RadioPlayer({
               : <FontAwesomeIcon icon={faVolumeUp}></FontAwesomeIcon>
             }
           </button>
-            <ReactSlider
+            { !hideVolumeSlider ?
+              <ReactSlider
                 thumbClassName={RadioPlayerStyle.Thumb}
                 trackClassName={RadioPlayerStyle.Track}
-                onChange={val => onVolumeChange(val / 100)}
+                onChange={val => {console.log('changing to...' + val); onVolumeChange(val / 100);}}
                 renderThumb={(props, state) => <div {...props}></div>}
                 value={volume * 100}
-            />
-          <video className={RadioPlayerStyle.RadioEmbed} ref={playerRef}>
-            <source src={streamURL} type="audio/mpeg" />
-          </video> 
+            /> : ''
+            
+            }
+            
+          <audio src={streamURL} type="audio/mpeg" controls className={RadioPlayerStyle.RadioEmbed} ref={playerRef}>
+          </audio> 
           { disabled ? <i className={RadioPlayerStyle.DisabledMessage}>{disabled}</i> : ''}
         </div> 
       }

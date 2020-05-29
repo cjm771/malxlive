@@ -100,6 +100,8 @@ $interation-needed-color-2: rgb(10, 255, 51);
       height: 0;
       visibility: hidden;
       opacity: 0;
+      position: absolute;
+      z-index: -1;
     }
   
     .Track {
