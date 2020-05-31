@@ -378,7 +378,7 @@ export default function Player(props) {
               <p>Malx.live is a project developed by Chris Malcolm for the purpose of resolving multiple video / audio stream sources from twitch, 
               discord, and radio casts..</p>
               <p>
-                <u>Twitch mode</u> will be audio from discord + gameplay a/v, a whole experience..where <u>Discord mode</u> will be just gameplay audio and visuals, so discussion via discord can occur without echoing.
+                An example,<u>Twitch mode</u> will be audio from discord + gameplay a/v, a whole experience..where <u>Discord mode</u> will be just gameplay audio and visuals, so discussion via discord can occur without echoing.
               </p>
               <button onClick={() => {setShowAbout(!showAbout)}}>Close</button>
             </div>
