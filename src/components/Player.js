@@ -39,10 +39,10 @@ const SOURCE_TYPES = {
       return false;
     },
     stop: function(serviceInstance) {
-      // serviceInstance.setMuted(true);
+      serviceInstance.pause();
     },
     start: function(serviceInstance) {
-      // serviceInstance.setMuted(false);
+      serviceInstance.play();
     },
     mute: function(serviceInstance) {
       serviceInstance.setMuted(true);
@@ -127,7 +127,7 @@ const SOURCES = [
     id: 'twitch-2',
     type: 'twitch',
     channel: 'malxxxxx2',
-  },
+  }
 ];
 
 const MODES = [

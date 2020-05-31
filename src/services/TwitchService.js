@@ -8,7 +8,8 @@ export default class TwitchService extends BaseMediaSevice {
   TIMEOUT = 10000;
   timer = null;
   inited = false;
-  
+  shouldAutoplay = true;
+
   init(channel, ref) {
     this.inited = true;
     this.embed = new this.twitch.Embed(ref.current.id, {
@@ -27,10 +28,32 @@ export default class TwitchService extends BaseMediaSevice {
       clearTimeout(this.timer);
       this.setupPlayerListeners();
       this.player = this.embed.getPlayer(); 
-      this.embed.play();
+      if (this.shouldAutoplay) {
+        this.embed.play();
+      }
       this.embed.setMuted(this.isMuted);
       this.update();
     });
+  }
+
+  play() {
+    if (this.inited) {
+      this.embed.play();
+      this.setPaused(false);
+      this.update();
+    } else {
+      this.shouldAutoplay = true;
+    }
+  }
+
+  pause() {
+    if (this.inited) {
+      this.embed.pause();
+      this.setPaused(true);
+      this.update();
+    } else {
+      this.shouldAutoplay = false;
+    }
   }
 
   setupPlayerListeners() {
