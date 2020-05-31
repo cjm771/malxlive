@@ -1,6 +1,5 @@
-## Malx live
-Malx live is a project developed by Chris Malcolm for the purpose of resolving multiple video / audio stream sources from twitch, discord, and radio casts..all into one experience. While created for personal use for 1) having twitch + discord commentary vs 2) gameplay a/v stream without commentary for discorders, could be readapted for hosting multi cast events or other pursuits.
-
+# Malx live
+Malx live is a project developed for the purpose of resolving multiple video / audio stream sources from twitch, discord, and radio casts..all into one experience. While created for personal use for 1) having twitch + discord commentary vs 2) gameplay a/v stream without commentary for discorders, could be readapted for hosting multi cast events or other pursuits.
 
 Desktop                         |  Mobile
 :------------------------------:|:-------------------------:
@@ -11,10 +10,23 @@ _Disaclaimer_: For app previews and channel examples I was just using what was o
 
 _2nd Disaclaimer_: Yes the skin and aesthetic is intentionally done this way. 
 
-### Configuring
+## Table of Contents
+<!-- TOC -->
+
+- [Malx live](#malx-live)
+  - [Table of Contents](#table-of-contents)
+  - [1.1. Configuring](#11-configuring)
+    - [1.1.1. Source Types](#111-source-types)
+    - [1.1.2. Sources](#112-sources)
+    - [1.1.3. Modes](#113-modes)
+  - [1.2. Skinning](#12-skinning)
+
+<!-- /TOC -->
+
+## 1.1. Configuring
 There are essentially *3 configurable objects* (see `Player.js`):
 
-#### Source Types
+### 1.1.1. Source Types
 
 *SOURCE_TYPES:* currently 2 types, defines `twitch` and `radio`. it basically defines how starting, stopping, initializing, etc works, its underlying bound service, service state -> hook state bindings, and other source type specific context.
 
@@ -44,7 +56,7 @@ const SOURCE_TYPES = {
 ```
 
 
-#### Sources
+### 1.1.2. Sources
 
 *SOURCES:* these are an array of sources, defining the soure type and other context specif configuration like channel name for twitch or streamUrl for radio
 
@@ -75,7 +87,7 @@ const SOURCES = [
 ];
 ```
 
-#### Modes
+### 1.1.3. Modes
 
 *MODES:* this defines the different modes which are switched via url / dropdown on the page. important attributes are `on` which tell the player to have that source shown and playing..and `muted` which will mute any `on` sources. the remaining would be effective shut off in that mode (paused and muted)
 
@@ -102,6 +114,6 @@ const MODES = [
 
 ```
 
-### Skinning
+## 1.2. Skinning
 
 Skinning has not been setup to be configurable, but may be done in the future. Let me know if you are interested.
