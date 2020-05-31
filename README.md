@@ -1,19 +1,19 @@
-# Malx live
-Malx live is a project developed for the purpose of resolving multiple video / audio stream sources from twitch, discord, and radio casts..all into one experience. While created for personal use for 1) having twitch + discord commentary vs 2) gameplay a/v stream without commentary for discorders, could be readapted for hosting multi cast events or other pursuits.
+# Malx.live
+Malx live (http://malx.live) is a project developed for the purpose of resolving multiple video / audio stream sources from twitch, discord, and radio casts..all into one experience. While created for personal use for 1) having twitch + discord commentary vs 2) gameplay a/v stream without commentary for discorders, could be readapted for hosting multi cast events or other pursuits.
 
 Desktop                         |  Mobile
 :------------------------------:|:-------------------------:
 ![preview](assets/preview.gif)  |  ![mobile-preview](assets/preview-mobile.gif)
 
 
-_Disaclaimer_: For app previews and channel examples I was just using what was on twitch's front page and in no way endorsing or promoting their content.
+_Disclaimer_: For app previews and channel examples I was just using what was on twitch's front page and in no way endorsing or promoting their content.
 
-_2nd Disaclaimer_: Yes the skin and aesthetic is intentionally done this way. 
+_2nd Disclaimer_: Yes the skin and aesthetic is intentionally done this way. 
 
 ## Table of Contents
 <!-- TOC -->
 
-- [Malx live](#malx-live)
+- [Malx.live](#malxlive)
   - [Table of Contents](#table-of-contents)
   - [1.1. Configuring](#11-configuring)
     - [1.1.1. Source Types](#111-source-types)
