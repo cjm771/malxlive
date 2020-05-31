@@ -1,12 +1,12 @@
 .MediaIndicator {
   padding-right: 1%;
 
+  &.DeEmphasize {
+    opacity: 0.6;
+  }
+  
   &.StatusOnline {
     color: rgb(0, 255, 0);
-
-    &.DeEmphasize {
-      opacity: 0.6;
-    }
   }
   
   &.StatusUnknown {

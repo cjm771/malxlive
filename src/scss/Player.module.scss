@@ -73,12 +73,54 @@
         font-family: 'Courier New', Courier, monospace;
         overflow: hidden;
         overflow-y: auto;
-        &.NoVid {
-          padding: 1rem;
-          font-weight: 800;
-          background: url('/assets/visual1.gif');
-          background-size: 100% 100%;
-          opacity: 0.8;
+
+        .EmbedWpr {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          display: none;
+
+          &.Active {
+            display: block;
+          }
+
+          .NoVid, 
+          .Embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;   
+          }
+
+          .NoVid {
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            font-weight: 800;
+            background: url('/assets/visual1.gif');
+            background-size: 100% 100%;
+            opacity: 0.8;
+          }
+          
+
+  
+          .Embed {
+            iframe {
+              width: 100%;
+              height: 100%;
+              display: none;
+            }
+  
+            &.Online {
+              iframe {
+                display: block;
+              }
+            }
+          }
         }
 
         &.Overlay {
@@ -100,18 +142,6 @@
         @include desktop {
           font-size: 1rem;
         }
-
-        iframe {
-          width: 100%;
-          height: 100%;
-          display: none;
-        }
-
-        &.Online {
-          iframe {
-            display: block;;
-          }
-        }
       }
 
       .Mode {
@@ -127,6 +157,8 @@
           font-weight: 800;
           font-size: 12px;
           background: transparent;
+          max-width: 90%;
+          float: right;
         }
         @include mobile {
           @include glossy-pane();
@@ -190,6 +222,7 @@
             bottom: 210%;
             left: 0%;
             width: 100%;
+            white-space: nowrap;
             text-align: left;
           }
         }

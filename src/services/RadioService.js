@@ -1,7 +1,7 @@
 import BaseMediaSevice from './BaseMediaSevice.js';
 import Axios from 'axios';
 
-export default new class RadioService extends BaseMediaSevice {
+export default class RadioService extends BaseMediaSevice {
 
   audioAPI = null;
   volume = 0.5;
@@ -25,6 +25,7 @@ export default new class RadioService extends BaseMediaSevice {
   }
 
   play() {
+     
       if (!this.isPlaying && this.isOnline()) {
         return this.audioAPI.play().then(() => {
           this.interactionNeeded = false;
@@ -40,20 +41,42 @@ export default new class RadioService extends BaseMediaSevice {
 
   pause() {
     this.isPlaying = false;
-    this.audioAPI.pause();
+    if (this.audioAPI) {
+      this.audioAPI.pause();
+    }
     this.triggerChange();
   }
 
   mute() {
     this.isMuted = true;
-    this.audioAPI.muted = true;
+    if (this.audioAPI) {
+      this.audioAPI.muted = true;
+    }
     this.triggerChange();
   }
 
   unmute() {
     this.isMuted = false;
-    this.audioAPI.muted = false;
+    if (this.audioAPI) {
+      this.audioAPI.muted = false;
+    }
     this.triggerChange();
+  }
+
+  togglePlayPause() {
+    if (this.isPlaying) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
+  toggleRadioMuteUnmute() {
+    if (this.isMuted) {
+      this.unmute();
+    } else {
+      this.mute();
+    }
   }
 
   isIOS() {
@@ -65,7 +88,9 @@ export default new class RadioService extends BaseMediaSevice {
   }
 
   setVolume(val, triggerChange=true) {
-    this.audioAPI.volume = val;
+    if (this.audioAPI) {
+      this.audioAPI.volume = val;
+    }
     this.volume = val;
     if (triggerChange) {
       this.triggerChange();
@@ -117,4 +142,4 @@ export default new class RadioService extends BaseMediaSevice {
     this.updateFromStatusURL();
   }
 
-}();
+};

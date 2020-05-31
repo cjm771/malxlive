@@ -10,7 +10,7 @@ import TwitchService from '../services/TwitchService.js';
 // styles
 import MediaIndicatorStyle from '../scss/MediaIndicator.module.scss';
 
-export default function MediaIndicator({status, isMuted, isPlaying, name, notPlayingIcon}) {
+export default function MediaIndicator({status, isMuted, isPlaying, name, notPlayingIcon, deEmphasize}) {
   
   /*********
    * VARS  *
@@ -35,7 +35,7 @@ export default function MediaIndicator({status, isMuted, isPlaying, name, notPla
   *********/
 
   return (
-    <span className={`${MediaIndicatorStyle.MediaIndicator} ${determineStatusClass(status)} ${(isMuted || !isPlaying) ? MediaIndicatorStyle.DeEmphasize : ''}`}>
+    <span className={`${MediaIndicatorStyle.MediaIndicator} ${determineStatusClass(status)} ${deEmphasize ? MediaIndicatorStyle.DeEmphasize : ''}`}>
       {name}
       {
         isMuted 

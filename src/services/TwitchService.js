@@ -1,16 +1,17 @@
 import BaseMediaSevice from './BaseMediaSevice.js';
 
-export default new class TwitchService extends BaseMediaSevice {
+export default class TwitchService extends BaseMediaSevice {
 
   twitch = window.Twitch;
   embed = null;
   player = null;
   TIMEOUT = 10000;
   timer = null;
-
+  inited = false;
   
-  init(channel) {
-    this.embed = new this.twitch.Embed("twitch-embed", {
+  init(channel, ref) {
+    this.inited = true;
+    this.embed = new this.twitch.Embed(ref.current.id, {
       channel,
       layout: "video",
       controls: true,
@@ -97,8 +98,11 @@ export default new class TwitchService extends BaseMediaSevice {
   }
 
   setMuted(shouldMute) {
-    this.embed.setMuted(shouldMute);
-    this.update({forceMute: shouldMute});
+    if (this.inited) {
+      this.embed.setMuted(shouldMute);
+      this.update({forceMute: shouldMute});
+    } else {
+    }
   }
 
-}();
+};

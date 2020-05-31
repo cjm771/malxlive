@@ -1,12 +1,12 @@
 export default class BaseMediaService {
   
-   STATUSES = {
+   static STATUSES = {
     UNKNOWN: -1, // grey loading..
     OFFLINE: 0, // red dot
     ONLINE: 1, // green dot 
   };
 
-  status = this.STATUSES.UNKNOWN;
+  status = BaseMediaService.STATUSES.UNKNOWN;
   statusMessage = null;
   isPlaying = false;
   isMuted = false;
@@ -17,14 +17,14 @@ export default class BaseMediaService {
   POLLING_INTERVAL = 5000;
 
   setOnline(val, statusMessage=null) {
-    this.status = val ? this.STATUSES.ONLINE : this.STATUSES.OFFLINE;
+    this.status = val ? BaseMediaService.STATUSES.ONLINE : BaseMediaService.STATUSES.OFFLINE;
     if (statusMessage) {
       this.statusMessage = statusMessage;
     }
   }
 
   isOnline() {
-    return this.status === this.STATUSES.ONLINE;
+    return this.status === BaseMediaService.STATUSES.ONLINE;
   }
 
   registerListener = (listener) => {

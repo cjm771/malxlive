@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 
 // imports
-import { faVideoSlash } from '@fortawesome/free-solid-svg-icons';
+import { faVideoSlash, faVolumeMute, faBroadcastTower } from '@fortawesome/free-solid-svg-icons';
 import { faTwitch, faDiscord } from '@fortawesome/free-brands-svg-icons';
 
 // services
@@ -17,30 +17,168 @@ import MediaIndicator from './MediaIndicator.js';
 import PlayerStyle from '../scss/Player.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+
+const SOURCE_TYPES = {
+  twitch: {
+    service: TwitchService,
+    updaters: {
+      'name': 'name',
+      'status' : 'status',
+      'muted': 'isMuted',
+      'playing': 'isPlaying'
+    },
+    notPlayingIcon: faVideoSlash,
+    sourceIcon: faTwitch,
+    getDescription: (sourceState) => {
+      return sourceState.name ? `Twitch: ${sourceState.name} ` : 'Twitch ';
+    },
+    getURL: (sourceState) => {
+      return `http://twitch.tv/${sourceState.name}`;
+    },
+    getDisabled: (sourceState, mode) => {
+      return false;
+    },
+    stop: function(serviceInstance) {
+      // serviceInstance.setMuted(true);
+    },
+    start: function(serviceInstance) {
+      // serviceInstance.setMuted(false);
+    },
+    mute: function(serviceInstance) {
+      serviceInstance.setMuted(true);
+    },
+    unmute: function(serviceInstance) {
+      serviceInstance.setMuted(false);
+    },
+    init: function (serviceInstance, createdRef, mode, config) {
+      serviceInstance.isMuted = mode === 'discordRadio' ? true : false;
+      serviceInstance.init(config.channel, createdRef);
+    }
+  },   
+  radio: {
+    service: RadioService,
+    updaters: {
+      'radioInteractionNeeded': 'interactionNeeded',
+      'status' : 'status',
+      'volume' : 'volume',
+      'playing': 'isPlaying',
+      'muted': 'isMuted',
+      'name': 'name',
+    },
+    notPlayingIcon: faVolumeMute,
+    sourceIcon: faBroadcastTower,
+    getDescription: (sourceState) => {
+      return sourceState.name ? `${sourceState.name} ` : 'Radio ';
+    },
+    getURL: (sourceState) => {
+      return sourceState.config.streamUrl;
+    },
+    getDisabled: (sourceState, mode) => {
+      if (mode !== 'discordRadio') {
+        return 'Radio Playback disabled in this mode, use twitch controls';
+      } else if (sourceState.status !== RadioService.STATUSES.ONLINE) {
+        return 'Radio Offline :(';
+      }
+       else {
+          return false;
+      }
+    },
+    stop: function(serviceInstance) {
+      serviceInstance.pause();
+      serviceInstance.mute();
+    },
+    start: function(serviceInstance) {
+      serviceInstance.play();
+      serviceInstance.unmute();
+    },
+    mute: function(serviceInstance) {
+      serviceInstance.mute();
+    },
+    unmute: function(serviceInstance) {
+      serviceInstance.unmute();
+    },
+    onStatusChange: function(serviceInstance, mode) {
+      if (serviceInstance.isOnline() && mode === 'discordRadio') {
+        serviceInstance.play();
+      }
+    },
+    init: function (serviceInstance, createdRef, mode, config) {
+      serviceInstance.isMuted = mode === 'discordRadio' ? true : false;
+      serviceInstance.init(createdRef.current, config.statusUrl);
+    }
+  },
+};
+
+const SOURCES = [
+  {
+    id: 'twitch-1',
+    type: 'twitch',
+    channel: 'malxxxxx',
+    showLink: true
+  },
+  {
+    id: 'radio-1',
+    type: 'radio',
+    // 'http://stream-relay-geo.ntslive.net/stream2'
+    streamUrl: 'http://12113.cloudrad.io:9350/live',
+    statusUrl: atob("aHR0cHM6Ly9jZG4yLmNsb3VkcmFkLmlvL21hbHgvbGl2ZS9zdHJlYW1pbmZvLmpzb24="),
+  },
+  {
+    id: 'twitch-2',
+    type: 'twitch',
+    channel: 'malxxxxx2',
+  },
+];
+
+const MODES = [
+  {
+    name: 'twitch',
+    description: 'Twitch mode (Gameplay Video/Audio/Discord Talk )',
+    on: ['twitch-1'],
+  },
+  {
+    name: 'discordRadio',
+    description: 'Discord Mode ( Gameplay Video[Twitch]/Audio[Radio] )',
+    on: ['twitch-1', 'radio-1'],
+    muted: ['twitch-1']
+  },
+  {
+    name: 'discord',
+    description: 'Discord Video Mode ( Gameplay Video/Audio via sep twitch )',
+    on: ['twitch-2'],
+  },
+];
+
+
+const globalState = {};
+
+
+for (let config of SOURCES) {
+  const {id, type} = config;
+  const sourceType = SOURCE_TYPES[type];
+  const sourceState = globalState[id] = {};
+  sourceState.type = sourceType;
+  sourceState.type.name = type;
+  sourceState.config =config;
+  sourceState.serviceInstance = new sourceType.service();
+}
+
+
 export default function Player(props) {
   
   /*********
    * VARS  *
    *********/
 
-  // TODO sources and modes config
-  // define on and off for each source (which would be by service) and modes set this up..
-
-  // {/* http://stream-relay-geo.ntslive.net/stream2 */}
-  // const RADIO_STREAM_URL = 'http://stream-relay-geo.ntslive.net/stream2';
-  const RADIO_STREAM_URL = 'http://12113.cloudrad.io:9350/live';
-  const RADIO_STATUS_URL = atob("aHR0cHM6Ly9jZG4yLmNsb3VkcmFkLmlvL21hbHgvbGl2ZS9zdHJlYW1pbmZvLmpzb24=");
-  const TWITCH_CHANNEL = 'malxxxxx';
   const DISCORD_ID = 'jr4bHKa';
-
   /*********
    * HLPRS *
    *********/
 
   const parseModeFromPath = () => {
     const parsedMode = window.location.pathname.replace('/', '').trim();
-    if (['twitch', 'discord'].indexOf(parsedMode) === -1) {
-      return 'twitch';
+    if (MODES.map(({name}) => {return name}).indexOf(parsedMode) === -1) {
+      return MODES[0].name;
     } else {
       return parsedMode;
     }
@@ -50,37 +188,25 @@ export default function Player(props) {
     setMode(e.target.value);
   };
 
-  const toggleRadioPlayPause = () => {
-    if (radioState.radioPlaying) {
-      RadioService.pause();
-    } else {
-      RadioService.play();
-    }
+  const getTwitchSourceStates = () => {
+    return getSourceStates().filter((sourceState) => {
+      return sourceState.type.name === 'twitch';
+    });
   };
 
-  const toggleRadioMuteUnmute = () => {
-    if (radioState.radioMuted) {
-      RadioService.unmute();
-    } else {
-      RadioService.mute();
-    }
+  const getSourceStates = () => {
+    const sourceStates = SOURCES.map(({id}) => {
+      return globalState[id];
+    });
+    return sourceStates;
   };
 
-  const handleRadioVolumeChange = (val) => {
-    RadioService.setVolume(val);
+  const getRadioSourceStates = () => {
+    return getSourceStates().filter((sourceState) => {
+      return sourceState.type.name === 'radio';
+    });
   };
 
-  const getRadioDisabled = () => {
-    // check if mode is twitch..
-    if (mode === 'twitch') {
-      return 'Radio Playback disabled in this mode, use twitch controls';
-    } else if (radioState.radioStatus !== RadioService.STATUSES.ONLINE) {
-      return 'Radio Offline :(';
-    }
-     else {
-        return false;
-    }
-  }
 
   /*********
    * HOOKS *
@@ -91,72 +217,91 @@ export default function Player(props) {
 
   // mode
   const [mode, setMode] = useState(parseModeFromPath());
-  
-  // twitch
-  const [twitchChannelName, setTwitchChannelName] = useState(TwitchService.name);
-  const [twitchStatus, setTwitchStatus] = useState(TwitchService.status);
-  const [twitchMuted, setTwitchMuted] = useState(TwitchService.isMuted);
-  const [twitchPlaying, setTwitchPlaying] = useState(TwitchService.isPlaying);
 
-  // radio
-  const radioState = {};
-  [radioState.radioName, radioState.setRadioName] = useState(RadioService.name);
-  [radioState.radioStatus, radioState.setRadioStatus] = useState(RadioService.status);
-  [radioState.radioVolume, radioState.setRadioVolume] = useState(RadioService.volume);
-  [radioState.radioMuted, radioState.setRadioMuted] = useState(RadioService.isMuted);
-  [radioState.radioPlaying, radioState.setRadioPlaying] = useState(RadioService.isPlaying);
-  [radioState.radioInteractionNeeded, radioState.setRadioInteractionNeeded] = useState(false);
-  radioState.playerRef = useRef();
+  for (let config of SOURCES) {
+    const {id} = config;
+    const sourceState = globalState[id];
+    [sourceState.active, sourceState.setActive] = useState(false); // eslint-disable-line react-hooks/rules-of-hooks
+    for (let [stateKey, instanceKey] of Object.entries(sourceState.type.updaters)) { 
+      const setStateKey = 'set' + stateKey;
+      [sourceState[stateKey], sourceState[setStateKey]] = useState(sourceState.serviceInstance[instanceKey]); // eslint-disable-line react-hooks/rules-of-hooks
+    }
+    sourceState.ref = useRef(); // eslint-disable-line react-hooks/rules-of-hooks
+  };
 
-  // init
+  /////////////////
+  //  UPDATERS   //
+  /////////////////
+
   useEffect(() => {
-
-    RadioService.registerListener((radioService) => {
-      // radio autoplay
-      radioState.setRadioInteractionNeeded(radioService.interactionNeeded);
-      radioState.setRadioStatus(radioService.status);
-      radioState.setRadioVolume(radioService.volume);
-      radioState.setRadioPlaying(radioService.isPlaying);
-      radioState.setRadioMuted(radioService.isMuted);
-      radioState.setRadioName(radioService.name);
-
-    });
-    
-    TwitchService.registerListener((twitchService) => {
-      setTwitchStatus(twitchService.status);
-      setTwitchMuted(twitchService.isMuted);
-      setTwitchPlaying(twitchService.isPlaying);
-      setTwitchChannelName(twitchService.name);
-    });
-    TwitchService.isMuted = mode === 'discord' ? true : false;
-    TwitchService.init(TWITCH_CHANNEL);
-
+    for (let {id} of SOURCES) {
+      const sourceState = globalState[id];
+      sourceState.serviceInstance.registerListener((service) => {
+        for (let [stateKey, instanceKey] of Object.entries(sourceState.type.updaters)) { 
+          sourceState['set' + stateKey](service[instanceKey]);
+        }
+      });
+    }
   }, []);
 
-  useEffect(() => {
-    if (radioState.playerRef && radioState.playerRef.current) {
-      // radio service init
-      RadioService.init(radioState.playerRef.current, RADIO_STATUS_URL);
-    }
-  }, [radioState.playerRef]);
+  /////////////////
+  // REFS / INIT //
+  /////////////////
 
-  // autoplay radio when online
-  useEffect(() => {
-    if (RadioService.isOnline() && mode === 'discord') {
-      RadioService.play();
-    }
-  }, [radioState.radioStatus]);
+  for (let {id} of SOURCES) {
+      const sourceState = globalState[id];
+
+      useEffect(() => {  // eslint-disable-line react-hooks/rules-of-hooks
+        if (sourceState.ref && sourceState.ref.current) {
+          sourceState.type.init(sourceState.serviceInstance, sourceState.ref, mode, sourceState.config);
+        }
+      }, [sourceState.ref]); 
+
+  //////////////////////
+  // ON STATUS CHANGE //
+  //////////////////////
+
+      useEffect(() => { // eslint-disable-line react-hooks/rules-of-hooks
+        const statusChangeHandler = sourceState.type.onStatusChange;
+        if (statusChangeHandler) {
+          statusChangeHandler(sourceState.serviceInstance, mode)
+        }
+      }, [sourceState.status]);
+  }
+
+  /////////////////////
+  // MODE TOGGLING   //
+  /////////////////////
 
   // modeswitch
   useEffect(() => {
-    if (mode === 'discord') {
-      RadioService.play();
-      RadioService.unmute();
-      TwitchService.setMuted(true);
-    } else {
-      RadioService.pause();
-      RadioService.mute();
-      TwitchService.setMuted(false);
+    for (let modeConfig of MODES) {
+      if (mode === modeConfig.name) {
+        const sourcesOn =  modeConfig.on || [];
+        const sourcesMuted =  modeConfig.muted || [];
+        const sourcesOff = SOURCES.map(({id}) => {return id}).filter((id) => {
+          return sourcesOn.indexOf(id) === -1;
+        });
+        sourcesOn.forEach((id) => {
+          const sourceState = globalState[id];
+          sourceState.setActive(true);
+          sourceState.type.unmute(sourceState.serviceInstance);
+          sourceState.type.start(sourceState.serviceInstance);
+        });
+        sourcesMuted.forEach((id) => {
+          const sourceState = globalState[id];
+          sourceState.setActive(true);
+          sourceState.type.mute(sourceState.serviceInstance);
+        });
+        sourcesOff.forEach((id) => {
+          const sourceState = globalState[id];
+          sourceState.setActive(false);
+          sourceState.type.mute(sourceState.serviceInstance);
+          sourceState.type.stop(sourceState.serviceInstance);
+        });
+      } else {
+
+      }
     }
     window.history.replaceState({}, null, `/${mode}`);
   }, [mode]);
@@ -172,8 +317,15 @@ export default function Player(props) {
         {/* dropdown */}
         <div className={PlayerStyle.Mode}>
           <select value={mode} className="form-control" onChange={handleChange}>
-            <option value="twitch">Twitch mode (Video + Audio + Commentary )</option>
-            <option value="discord">Discord mode (Video + Audio )</option>
+            {
+              MODES.map((mode) => {
+                return (
+                  <option key={mode.name} value={mode.name}>
+                    { mode.description }
+                  </option>
+                )
+              })
+            }
           </select>
         </div>
 
@@ -189,18 +341,35 @@ export default function Player(props) {
             <span className={PlayerStyle.Close}>X</span>
             </MLTooltip>
         </div>
-        {/* twitch */}
-        <div className={`${PlayerStyle.Twitch} ${twitchStatus !== TwitchService.STATUSES.OFFLINE ? PlayerStyle.Online : ''}`} id="twitch-embed"></div>
-        {
-          twitchStatus !== TwitchService.STATUSES.OFFLINE 
-          ? ''
-          : <div className={`${PlayerStyle.Twitch} ${PlayerStyle.NoVid}`}>{
-            twitchChannelName 
-            ? `${twitchChannelName}'s Twitch is not live right now :(` 
-            : 'Twitch Not Live right now :('
+        {/* twitch sources.. */}
+          <div className={PlayerStyle.Twitch}>
+          {
+            getTwitchSourceStates().map((sourceState) => {
+              return (
+                <div key={sourceState.id} className={`${PlayerStyle.EmbedWpr} ${sourceState.active ? PlayerStyle.Active : ''}`} id={sourceState.id}>    
+                    {/* online */}
+                    <div
+                      ref={sourceState.ref}
+                      className={`${PlayerStyle.Embed} ${sourceState.status !== TwitchService.STATUSES.OFFLINE ? PlayerStyle.Online : ''}`} 
+                      id={"twitch-embed-" + sourceState.config.channel}
+                    ></div>
+                    {/* not online */}
+                    {
+                      sourceState.status !== TwitchService.STATUSES.OFFLINE 
+                      ? ''
+                      : <div className={PlayerStyle.NoVid}>{
+                        sourceState.name 
+                        ? `${sourceState.name}'s Twitch is not live right now :(` 
+                        : 'Twitch Not Live right now :('
+                      }
+                      </div>
+                    }
+                </div>
+
+              )  
+            })
           }
           </div>
-        }
         {
           !showAbout
           ? ''
@@ -220,36 +389,42 @@ export default function Player(props) {
         <div className={PlayerStyle.RadioControls}>
             {/* status  */}
             <div className={PlayerStyle.Status}>
-              <MediaIndicator 
-                name={
-                  twitchChannelName ? `Twitch: ${twitchChannelName} ` : 'Twitch '
-                }
-                status={twitchStatus}
-                isPlaying={twitchPlaying}
-                isMuted={twitchMuted}
-                notPlayingIcon={faVideoSlash}
-              />
-               <MediaIndicator 
-                name={radioState.radioName ? `${radioState.radioName} ` : 'Radio '}
-                status={radioState.radioStatus}
-                isPlaying={radioState.radioPlaying}
-                isMuted={radioState.radioMuted}
-                notPlayingIcon={radioState.faVolumeMute}
-              />
+              {
+                getSourceStates().map((sourceState) => {
+                  return (
+                    <MediaIndicator 
+                      key={sourceState.id}
+                      name={sourceState.type.getDescription(sourceState)}
+                      status={sourceState.status}
+                      isPlaying={sourceState.playing}
+                      isMuted={sourceState.muted}
+                      deEmphasize={!sourceState.active}
+                      notPlayingIcon={sourceState.type.notPlayingIcon}
+                    />
+                  )
+                })
+              }
             </div>
-            <RadioPlayer 
-              interactionNeeded={radioState.radioInteractionNeeded}
-              playerRef={radioState.playerRef} 
-              streamURL={RADIO_STREAM_URL} 
-              isPlaying={radioState.radioPlaying}
-              isMuted={radioState.radioMuted}
-              volume={radioState.radioVolume}
-              hideVolumeSlider={!RadioService.deviceSupportsVolumeControl()}
-              onPlayPauseClick={() => { toggleRadioPlayPause() }}
-              onMuteUnmuteClick={() => { toggleRadioMuteUnmute() }}
-              onVolumeChange={(val) => { handleRadioVolumeChange(val) }}
-              disabled={getRadioDisabled()}
-            />
+            {
+              getRadioSourceStates().map((sourceState) => {
+                return (
+                  <RadioPlayer 
+                    key={sourceState.id}
+                    interactionNeeded={sourceState.radioInteractionNeeded}
+                    playerRef={sourceState.ref} 
+                    streamURL={sourceState.config.streamUrl} 
+                    isPlaying={sourceState.playing}
+                    isMuted={sourceState.muted}
+                    volume={sourceState.volume}
+                    hideVolumeSlider={sourceState.serviceInstance ? !sourceState.serviceInstance.deviceSupportsVolumeControl() : false}
+                    onPlayPauseClick={() => { sourceState.serviceInstance.togglePlayPause() }}
+                    onMuteUnmuteClick={() => { sourceState.serviceInstance.toggleRadioMuteUnmute() }}
+                    onVolumeChange={(val) => { sourceState.serviceInstance.setVolume(val) }}
+                    disabled={sourceState.type.getDisabled(sourceState, mode)}
+                  />
+                )
+              })
+            }
             {/* logo */}
             <div className={PlayerStyle.IconDock}>
               <MLTooltip text="About Malx.Live" placement="top" id="tooltip-minimize">
@@ -262,11 +437,19 @@ export default function Player(props) {
                   <FontAwesomeIcon icon={faDiscord} />
                 </a>
               </MLTooltip>
-              <MLTooltip text="Open Malx Twitch" placement="top" id="tooltip-minimize">
-                <a href={`http://twitch.tv/${twitchChannelName}`} target="_blank" className={PlayerStyle.LogoWpr}>
-                  <FontAwesomeIcon icon={faTwitch} />
-                </a>
-              </MLTooltip>
+              {
+                getSourceStates().map((sourceState) => {
+                  return sourceState.config.showLink 
+                    ? (
+                      <MLTooltip key={sourceState.id} text={`Open ${sourceState.type.getDescription(sourceState)}`} placement="top" id="tooltip-minimize">
+                        <a href={sourceState.type.getURL(sourceState)} target="_blank" className={PlayerStyle.LogoWpr}>
+                          <FontAwesomeIcon icon={sourceState.type.sourceIcon} />
+                        </a>
+                      </MLTooltip>
+                    )
+                    : <span key={sourceState.id}></span>
+                })
+              }
             </div>
         </div>
       </div>
