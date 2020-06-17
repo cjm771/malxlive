@@ -17,7 +17,7 @@ export default class TwitchService extends BaseMediaSevice {
       layout: "video",
       controls: true,
       muted: false,
-      parent: ['localhost', 'malx.live', 'www.malx.live']
+      parent: ['localhost', 'malx.live', 'www.malx.live', 'malx-live.herokuapp.com']
     });
 
     // timeout
