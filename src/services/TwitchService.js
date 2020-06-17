@@ -17,7 +17,7 @@ export default class TwitchService extends BaseMediaSevice {
       layout: "video",
       controls: true,
       muted: false,
-      parent: [window.location.hostname]
+      parent: ['localhost', 'malx.live', 'www.malx.live']
     });
 
     // timeout
