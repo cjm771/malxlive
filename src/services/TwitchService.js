@@ -16,7 +16,8 @@ export default class TwitchService extends BaseMediaSevice {
       channel,
       layout: "video",
       controls: true,
-      muted: false
+      muted: false,
+      parent: [window.location.hostname]
     });
 
     // timeout
