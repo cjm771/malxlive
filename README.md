@@ -1,5 +1,5 @@
 # Malx.live
-Malx live (http://malx.live) is a project developed for the purpose of resolving multiple video / audio stream sources from twitch, discord, and radio casts..all into one experience. While created for personal use for 1) having twitch + discord commentary vs 2) gameplay a/v stream without commentary for discorders, could be readapted for hosting multi cast events or other pursuits.
+Malx live (https://malx.live) is a project developed for the purpose of resolving multiple video / audio stream sources from twitch, discord, and radio casts..all into one experience. While created for personal use for 1) having twitch + discord commentary vs 2) gameplay a/v stream without commentary for discorders, could be readapted for hosting multi cast events or other pursuits.
 
 Desktop                         |  Mobile
 :------------------------------:|:-------------------------:
@@ -59,6 +59,8 @@ const SOURCE_TYPES = {
 ### 1.1.2. Sources
 
 *SOURCES:* these are an array of sources, defining the soure type and other context specif configuration like channel name for twitch or streamUrl for radio
+
+*UPDATE: June 10, 2020*. Twitch changed its requirements for using embeds, "you’ll need to begin including a list of the domains your content appears on using the parent parameter when initializing your Twitch embed". [Read more about it here](https://discuss.dev.twitch.tv/t/twitch-embedded-player-updates-in-2020/23956). You'll also need to server from https:// unless your localhost.
 
 ```js
 const SOURCES = [
